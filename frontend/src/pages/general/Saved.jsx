@@ -13,9 +13,10 @@ const Saved = () => {
                     _id: item.food._id,
                     video: item.food.video,
                     description: item.food.description,
-                    likeCount: item.food.likeCount,
-                    savesCount: item.food.savesCount,
-                    commentsCount: item.food.commentsCount,
+                    likeCount: item.food.likeCount ?? 0,
+                    // support older documents that used `saveCount`
+                    savesCount: item.food.savesCount ?? item.food.saveCount ?? 0,
+                    commentsCount: item.food.commentsCount ?? 0,
                     foodPartner: item.food.foodPartner,
                 }))
                 setVideos(savedFoods)
@@ -24,8 +25,14 @@ const Saved = () => {
 
     const removeSaved = async (item) => {
         try {
-            await axios.post("http://localhost:3000/api/food/save", { foodId: item._id }, { withCredentials: true })
-            setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: Math.max(0, (v.savesCount ?? 1) - 1) } : v))
+            const response = await axios.post("http://localhost:3000/api/food/save", { foodId: item._id }, { withCredentials: true })
+            // Prefer authoritative server count when provided
+            const serverCount = response.data.savesCount
+            if (typeof serverCount === 'number') {
+                setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: serverCount } : v))
+            } else {
+                setVideos((prev) => prev.map((v) => v._id === item._id ? { ...v, savesCount: Math.max(0, (v.savesCount ?? 1) - 1) } : v))
+            }
         } catch {
             // noop
         }
