@@ -8,9 +8,13 @@ const cors = require('cors');
 
 const app = express();
 // Allow CORS from configured frontend URL (set FRONTEND_URL in Render/Vercel env)
-const frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
+// const frontendOrigin = process.env.VITE_API_URL || 'http://localhost:5173';
 app.use(cors({
-  origin: frontendOrigin,
+  origin: [
+    'https://feasto-self.vercel.app',
+    'http://localhost:5173', // for local development
+    'http://localhost:3000'
+  ],
   credentials: true, // Allow cookies to be sent
 }));
 app.use(express.json());
