@@ -5,14 +5,11 @@ const jwt = require('jsonwebtoken');
 
 
 const cookieOptions = {
-   
-    secure: process.env.NODE_ENV === 'production', 
-    
-    httpOnly: true, 
-   
-    sameSite: 'Lax', 
-
-    maxAge: 7 * 24 * 60 * 60 * 1000 
+    // In production (cross-site) you must set `sameSite: 'none'` and `secure: true`
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
 

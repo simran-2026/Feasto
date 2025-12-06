@@ -7,8 +7,10 @@ const foodPartnerRoutes = require('./routes/food-partner');
 const cors = require('cors');
 
 const app = express();
+// Allow CORS from configured frontend URL (set FRONTEND_URL in Render/Vercel env)
+const frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:5173';
 app.use(cors({
-  origin: 'http://localhost:5173', // Replace with your frontend URL
+  origin: frontendOrigin,
   credentials: true, // Allow cookies to be sent
 }));
 app.use(express.json());
