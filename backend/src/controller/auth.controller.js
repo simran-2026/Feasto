@@ -130,7 +130,7 @@ async function registerFoodPartner(req, res) {
 async function loginFoodPartner(req, res) {
     const { email, password } = req.body;
 
-    const foodPartner = await foodPartnerModel.findOne({ email })
+    const foodPartner = await foodPartnerModel.findOne({ email }).select('+password')
 
     if (!foodPartner) {
         return res.status(400).json({ message: "Invalid email or password" })
