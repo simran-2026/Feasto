@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
 import '../../styles/create-food.css';
 import { useNavigate } from 'react-router-dom';
-import API_URL from '../../config/api';
+import API_URL from '../../config/api'; // Ensure this file is updated to "https://feasto-fgcn.onrender.com"
 
 const CreateFood = () => {
     const [ name, setName ] = useState('');
@@ -48,25 +48,56 @@ const CreateFood = () => {
 
     const openFileDialog = () => fileInputRef.current?.click();
 
+    // -----------------------------------------------------------------
+    // 👇 CORRECTED onSubmit FUNCTION WITH ERROR HANDLING 👇
+    // -----------------------------------------------------------------
     const onSubmit = async (e) => {
         e.preventDefault();
+
+        // Check if the submit button was somehow bypassed
+        if (isDisabled) {
+            console.error("Attempted submission with missing data.");
+            alert("Please provide a name and a video file.");
+            return;
+        }
 
         const formData = new FormData();
 
         formData.append('name', name);
         formData.append('description', description);
-    // backend expects the file field name to be 'video' (upload.single('video'))
-    formData.append("video", videoFile);
+        // Field name 'video' MUST match Multer configuration on the backend
+        formData.append("video", videoFile);
 
-        const response = await axios.post(`${API_URL}/api/food`, formData, {
-            withCredentials: true,
-        })
+        try {
+            const response = await axios.post(`${API_URL}/api/food`, formData, {
+                withCredentials: true,
+                // Content-Type is handled automatically by Axios for FormData
+            });
 
-        console.log(response.data);
-        navigate("/home"); // Redirect to home after successful creation
-        // Optionally reset
-        // setName(''); setDescription(''); setVideoFile(null);
+            console.log("Food Created Successfully:", response.data);
+            
+            // Success cleanup
+            setName(''); 
+            setDescription(''); 
+            setVideoFile(null);
+            
+            navigate("/home"); // Redirect to home after successful creation
+
+        } catch (error) {
+            // Log the error details to the console for deep diagnosis
+            console.error("❌ Food Submission Failed:", error);
+            
+            // Display user-friendly alert with error details
+            const errorMessage = error.response?.data?.message 
+                               ? `Server Error: ${error.response.data.message}` 
+                               : error.message === 'Network Error' 
+                               ? 'Network Error. Check console for CORS/API URL issues.' 
+                               : `Submission failed: ${error.message}`;
+            
+            alert(`Upload Failed: ${errorMessage}`);
+        }
     };
+    // -----------------------------------------------------------------
 
     const isDisabled = useMemo(() => !name.trim() || !videoFile, [ name, videoFile ]);
 
@@ -79,6 +110,7 @@ const CreateFood = () => {
                 </header>
 
                 <form className="create-food-form" onSubmit={onSubmit}>
+                    {/* ... (rest of your form content is unchanged) ... */}
                     <div className="field-group">
                         <label htmlFor="foodVideo">Food Video</label>
                         <input
