@@ -5,7 +5,7 @@ import ReelFeed from '../../components/ReelFeed'
 import API_URL from '../../config/api';
 
 
-const API = import.meta.env.API_URL || 'http://localhost:3000'
+// const API = import.meta.env.API_URL || 'http://localhost:3000'
 
 const Home = () => {
     const [ videos, setVideos ] = useState([])
@@ -13,7 +13,7 @@ const Home = () => {
     useEffect(() => {
         async function fetchVideos() {
             try {
-                const response = await axios.get(`${API}/api/food`, { withCredentials: true })
+                const response = await axios.get(`${API_URL}/api/food`, { withCredentials: true })
                 console.log('GET /api/food response:', response.data);
                 const items = response.data.foodItems || response.data.foodItem || [];
                 setVideos(items);
@@ -26,7 +26,7 @@ const Home = () => {
 
     async function likeVideo(item) {
         try {
-            const response = await axios.post(`${API}/api/food/like`, { foodId: item._id }, { withCredentials: true })
+            const response = await axios.post(`${API_URL}/api/food/like`, { foodId: item._id }, { withCredentials: true })
             const liked = response.data.like
             if (liked) {
                 setVideos(prev => prev.map(v => v._id === item._id ? { ...v, likeCount: (v.likeCount ?? 0) + 1 } : v))
@@ -40,7 +40,7 @@ const Home = () => {
 
     async function saveVideo(item) {
         try {
-            const response = await axios.post(`${API}/api/food/save`, { foodId: item._id }, { withCredentials: true })
+            const response = await axios.post(`${API_URL}/api/food/save`, { foodId: item._id }, { withCredentials: true })
             const serverCount = response.data.savesCount
             if (typeof serverCount === 'number') {
                 setVideos(prev => prev.map(v => v._id === item._id ? { ...v, savesCount: serverCount } : v))
